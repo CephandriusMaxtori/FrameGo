@@ -255,116 +255,109 @@
                 <!-- Module Options Panel -->
                 <template x-if="expanded === m.name">
                   <div class="p-3.5 bg-slate-950/90 border-t border-slate-800/60">
-                    <!-- Schema exists: form mode -->
-                    <template x-if="schemas[m.name]">
-                      <div>
-                        <div class="flex items-center gap-2 mb-3">
-                          <span class="text-[10px] font-mono text-slate-500 truncate" x-text="schemas[m.name].description"></span>
-                          <div class="ml-auto flex items-center bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
-                            <button @click="optionsMode[m.name] = 'form'" class="px-2 py-1 text-[10px] font-medium transition"
-                              :class="optionsMode[m.name] === 'form' ? 'bg-sky-500/20 text-sky-400' : 'text-slate-500 hover:text-slate-300'">Form</button>
-                            <button @click="toggleOptionsMode(m.name)" class="px-2 py-1 text-[10px] font-medium transition"
-                              :class="optionsMode[m.name] === 'json' ? 'bg-sky-500/20 text-sky-400' : 'text-slate-500 hover:text-slate-300'">JSON</button>
-                          </div>
-                        </div>
+                    <div x-show="schemas[m.name]" class="text-[10px] font-mono text-slate-500 mb-3 truncate" x-text="schemas[m.name]?.description"></div>
 
-                        <!-- Form Mode -->
-                        <div x-show="optionsMode[m.name] === 'form'" class="space-y-3">
-                          <template x-for="f in schemas[m.name].fields" :key="f.key">
-                            <div class="fg-field">
-                              <label class="flex items-center gap-1.5 mb-1">
-                                <span class="text-[11px] font-medium text-slate-400" x-text="f.label"></span>
-                                <span x-show="f.required" class="text-red-400 text-[10px]">*</span>
-                                <span x-show="f.hint" class="text-[10px] text-slate-600" x-text="f.hint" :title="f.hint"></span>
-                              </label>
+                    <!-- Form fields from schema -->
+                    <div x-show="schemas[m.name]" class="space-y-3">
+                      <template x-for="f in schemas[m.name]?.fields || []" :key="f.key">
+                        <div class="fg-field">
+                          <label class="flex items-center gap-1.5 mb-1">
+                            <span class="text-[11px] font-medium text-slate-400" x-text="f.label"></span>
+                            <span x-show="f.required" class="text-red-400 text-[10px]">*</span>
+                            <span x-show="f.hint" class="text-[10px] text-slate-600" x-text="f.hint" :title="f.hint"></span>
+                          </label>
 
-                              <!-- Text / Password / File -->
-                              <template x-if="f.kind === 'text' || f.kind === 'password' || f.kind === 'file'">
-                                <input :type="f.kind === 'password' ? 'password' : 'text'"
-                                  :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
-                                  :placeholder="f.placeholder || f.default"
-                                  @input="setField(m, f.key, $event.target.value)"
-                                  class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                          <template x-if="f.kind === 'text' || f.kind === 'password' || f.kind === 'file'">
+                            <input :type="f.kind === 'password' ? 'password' : 'text'"
+                              :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                              :placeholder="f.placeholder || f.default"
+                              @input="setField(m, f.key, $event.target.value)"
+                              class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                          </template>
+
+                          <template x-if="f.kind === 'number'">
+                            <input type="number"
+                              :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                              :min="f.min || undefined" :max="f.max || undefined"
+                              @input="setFieldNum(m, f.key, $event.target.value)"
+                              class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                          </template>
+
+                          <template x-if="f.kind === 'duration'">
+                            <div class="flex items-center gap-2">
+                              <input type="number"
+                                :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                                min="1"
+                                @input="setFieldNum(m, f.key, $event.target.value)"
+                                class="flex-1 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                              <span class="text-[10px] text-slate-500">sec</span>
+                            </div>
+                          </template>
+
+                          <template x-if="f.kind === 'boolean'">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox"
+                                :checked="m.options[f.key] !== undefined ? m.options[f.key] : f.default === 'true'"
+                                @change="setFieldBool(m, f.key, $event.target.checked)"
+                                class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 focus:ring-offset-0 accent-sky-500">
+                              <span class="text-xs text-slate-400" x-text="(m.options[f.key] !== undefined ? m.options[f.key] : f.default === 'true') ? 'On' : 'Off'"></span>
+                            </label>
+                          </template>
+
+                          <template x-if="f.kind === 'select'">
+                            <select :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                              @change="setField(m, f.key, $event.target.value)"
+                              class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none focus:border-sky-500 transition">
+                              <template x-for="opt in f.options" :key="opt">
+                                <option :value="opt" x-text="opt"></option>
                               </template>
+                            </select>
+                          </template>
 
-                              <!-- Number -->
-                              <template x-if="f.kind === 'number'">
-                                <input type="number"
-                                  :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
-                                  :min="f.min || undefined" :max="f.max || undefined"
-                                  @input="setFieldNum(m, f.key, $event.target.value)"
-                                  class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
-                              </template>
-
-                              <!-- Duration (stored as seconds) -->
-                              <template x-if="f.kind === 'duration'">
-                                <div class="flex items-center gap-2">
-                                  <input type="number"
-                                    :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
-                                    min="1"
-                                    @input="setFieldNum(m, f.key, $event.target.value)"
-                                    class="flex-1 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
-                                  <span class="text-[10px] text-slate-500">sec</span>
-                                </div>
-                              </template>
-
-                              <!-- Boolean -->
-                              <template x-if="f.kind === 'boolean'">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                  <input type="checkbox"
-                                    :checked="m.options[f.key] !== undefined ? m.options[f.key] : f.default === 'true'"
-                                    @change="setFieldBool(m, f.key, $event.target.checked)"
-                                    class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 focus:ring-offset-0 accent-sky-500">
-                                  <span class="text-xs text-slate-400" x-text="(m.options[f.key] !== undefined ? m.options[f.key] : f.default === 'true') ? 'On' : 'Off'"></span>
-                                </label>
-                              </template>
-
-                              <!-- Select -->
-                              <template x-if="f.kind === 'select'">
-                                <select :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
-                                  @change="setField(m, f.key, $event.target.value)"
-                                  class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none focus:border-sky-500 transition">
-                                  <template x-for="opt in f.options" :key="opt">
-                                    <option :value="opt" x-text="opt"></option>
-                                  </template>
-                                </select>
-                              </template>
-
-                              <!-- Color -->
-                              <template x-if="f.kind === 'color'">
-                                <div class="flex items-center gap-2">
-                                  <input type="color"
-                                    :value="m.options[f.key] || f.default"
-                                    @input="setField(m, f.key, $event.target.value)"
-                                    class="w-10 h-10 rounded-lg border border-slate-800 cursor-pointer bg-transparent">
-                                  <input type="text"
-                                    :value="m.options[f.key] || f.default"
-                                    @input="setField(m, f.key, $event.target.value)"
-                                    class="flex-1 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition"
-                                    placeholder="#rrggbb">
-                                </div>
-                              </template>
+                          <template x-if="f.kind === 'color'">
+                            <div class="flex items-center gap-2">
+                              <input type="color"
+                                :value="m.options[f.key] || f.default"
+                                @input="setField(m, f.key, $event.target.value)"
+                                class="w-10 h-10 rounded-lg border border-slate-800 cursor-pointer bg-transparent">
+                              <input type="text"
+                                :value="m.options[f.key] || f.default"
+                                @input="setField(m, f.key, $event.target.value)"
+                                class="flex-1 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition"
+                                placeholder="#rrggbb">
                             </div>
                           </template>
                         </div>
+                      </template>
+                    </div>
 
-                        <!-- JSON Mode -->
-                        <div x-show="optionsMode[m.name] === 'json'">
-                          <textarea x-model="m.optionsText" @input="optionsChanged(m)" rows="5" spellcheck="false"
-                            class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs fg-code text-slate-200 outline-none focus:border-sky-500 scroll-thin shadow-inner" placeholder="JSON options..."></textarea>
-                          <p x-show="m.optionsErr" class="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1" x-text="m.optionsErr"></p>
+                    <!-- Auto-generated fields from raw options (no schema) -->
+                    <div x-show="!schemas[m.name]" class="space-y-3">
+                      <template x-for="key in Object.keys(m.options || {})" :key="key">
+                        <div class="fg-field">
+                          <label class="text-[11px] font-medium text-slate-400 mb-1 block" x-text="key"></label>
+                          <template x-if="typeof m.options[key] === 'boolean'">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" :checked="m.options[key]"
+                                @change="setFieldBool(m, key, $event.target.checked)"
+                                class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 focus:ring-offset-0 accent-sky-500">
+                              <span class="text-xs text-slate-400" x-text="m.options[key] ? 'On' : 'Off'"></span>
+                            </label>
+                          </template>
+                          <template x-if="typeof m.options[key] === 'number'">
+                            <input type="number" :value="m.options[key]"
+                              @input="setFieldNum(m, key, $event.target.value)"
+                              class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                          </template>
+                          <template x-if="typeof m.options[key] !== 'boolean' && typeof m.options[key] !== 'number'">
+                            <input type="text" :value="m.options[key]"
+                              @input="setField(m, key, $event.target.value)"
+                              class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                          </template>
                         </div>
-                      </div>
-                    </template>
-
-                    <!-- No schema: JSON only -->
-                    <template x-if="!schemas[m.name]">
-                      <div>
-                        <textarea x-model="m.optionsText" @input="optionsChanged(m)" rows="5" spellcheck="false"
-                          class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs fg-code text-slate-200 outline-none focus:border-sky-500 scroll-thin shadow-inner" placeholder="JSON options..."></textarea>
-                        <p x-show="m.optionsErr" class="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1" x-text="m.optionsErr"></p>
-                      </div>
-                    </template>
+                      </template>
+                      <p x-show="Object.keys(m.options || {}).length === 0" class="text-[11px] text-slate-600 italic">No options configured.</p>
+                    </div>
                   </div>
                 </template>
               </div>

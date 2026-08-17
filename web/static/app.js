@@ -19,7 +19,7 @@ window.framego = function () {
     loading: true,
     dirty: false,
     dragOverZone: null,
-    optionsMode: {},
+    expandTarget: null,
 
     async init() {
       this.loading = true;
@@ -48,9 +48,7 @@ window.framego = function () {
 
     decorate(m) {
       m.options = m.options || {};
-      m.optionsText = JSON.stringify(m.options, null, 2);
       m.optionsErr = "";
-      if (!this.optionsMode[m.name]) this.optionsMode[m.name] = "form";
       return m;
     },
 
@@ -146,7 +144,6 @@ window.framego = function () {
         for (const f of schema.fields) {
           if (f.default) m.options[f.key] = this.parseDefault(f);
         }
-        m.optionsText = JSON.stringify(m.options, null, 2);
       }
       this.modules.push(m);
       this.newType = this.moduleTypes.find((t) => !this.modules.some((m) => m.name === t)) || "";
@@ -167,45 +164,10 @@ window.framego = function () {
 
     toggleEdit(name) {
       this.expanded = this.expanded === name ? null : name;
-      if (this.expanded === name) {
-        const m = this.modules.find((x) => x.name === name);
-        if (m) {
-          m.optionsText = JSON.stringify(m.options || {}, null, 2);
-          if (!this.optionsMode[name]) this.optionsMode[name] = "form";
-        }
-      }
-    },
-
-    toggleOptionsMode(name) {
-      const m = this.modules.find((x) => x.name === name);
-      if (!m) return;
-      if (this.optionsMode[name] === "form") {
-        this.optionsMode[name] = "json";
-        m.optionsText = JSON.stringify(m.options || {}, null, 2);
-      } else {
-        this.optionsMode[name] = "form";
-        try {
-          m.options = JSON.parse(m.optionsText || "{}");
-          m.optionsErr = "";
-        } catch (err) {
-          m.optionsErr = err.message;
-        }
-      }
-    },
-
-    optionsChanged(m) {
-      try {
-        m.options = JSON.parse(m.optionsText || "{}");
-        m.optionsErr = "";
-        this.dirty = true;
-      } catch (err) {
-        m.optionsErr = err.message;
-      }
     },
 
     setField(m, key, val) {
       m.options[key] = val;
-      m.optionsText = JSON.stringify(m.options, null, 2);
       this.dirty = true;
     },
 
@@ -218,15 +180,7 @@ window.framego = function () {
       this.setField(m, key, !!val);
     },
 
-    anyOptionsError() {
-      return this.modules.some((m) => m.optionsErr);
-    },
-
     async save() {
-      if (this.anyOptionsError()) {
-        this.toast("Fix module option JSON errors before saving", "error");
-        return;
-      }
       this.saving = true;
       const cfg = {
         display: {
