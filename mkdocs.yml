@@ -1,0 +1,68 @@
+site_name: FrameGo
+site_description: A pure-Go smart mirror and kiosk engine
+site_url: https://CephandriusMaxtori.github.io/FrameGo
+repo_url: https://github.com/CephandriusMaxtori/FrameGo
+repo_name: CephandriusMaxtori/FrameGo
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: sky
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    - scheme: default
+      primary: sky
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Configuration: configuration.md
+  - Modules:
+      - Overview: modules/index.md
+      - Clock: modules/clock.md
+      - Date: modules/date.md
+      - Weather: modules/weather.md
+      - Calendar: modules/calendar.md
+      - System: modules/system.md
+      - Moon: modules/moon.md
+      - Quote: modules/quote.md
+      - Slideshow: modules/slideshow.md
+  - Kiosk Mode: kiosk.md
+  - Admin UI: admin-ui.md
+  - REST API: api.md
+  - Architecture: architecture.md
+  - Contributing: contributing.md
