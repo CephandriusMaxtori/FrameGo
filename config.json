@@ -1,0 +1,58 @@
+{
+  "display": {
+    "width": 800,
+    "height": 480,
+    "margin": 16,
+    "gap": 8,
+    "fps": 1,
+    "background": "#0b0f14"
+  },
+  "admin": {
+    "enabled": true,
+    "bind": "0.0.0.0:8080",
+    "token": ""
+  },
+  "modules": [
+    {
+      "name": "clock",
+      "zone": "middle-right",
+      "visible": true,
+      "options": {
+        "dateColor": "#9aa7b8",
+        "dateFormat": "Mon, Jan 2",
+        "format": "15:04",
+        "timeColor": "#f5f7fa"
+      }
+    },
+    {
+      "name": "date",
+      "zone": "top-center",
+      "visible": true,
+      "options": {
+        "format": "Jan 2, 2006",
+        "weekdayFormat": "Monday"
+      }
+    },
+    {
+      "name": "moon",
+      "zone": "middle-left",
+      "visible": true,
+      "options": {
+        "showPercent": true
+      }
+    },
+    {
+      "name": "quote",
+      "zone": "bottom-bar",
+      "visible": true,
+      "options": {
+        "interval": 86400
+      }
+    },
+    {
+      "name": "nfl",
+      "zone": "middle-center",
+      "visible": true
+    }
+  ]
+}

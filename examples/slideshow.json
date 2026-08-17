@@ -1,0 +1,27 @@
+{
+  "display": {
+    "width": 800,
+    "height": 480,
+    "margin": 16,
+    "gap": 8,
+    "fps": 1,
+    "background": "#0b0f14"
+  },
+  "admin": {
+    "enabled": false,
+    "bind": "0.0.0.0:8080",
+    "token": ""
+  },
+  "modules": [
+    {
+      "name": "slideshow",
+      "zone": "middle-center",
+      "visible": true,
+      "options": {
+        "dir": "/home/pi/photos",
+        "interval": 15,
+        "fit": "contain"
+      }
+    }
+  ]
+}

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>FrameGo Admin Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/static/app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #070b14; color: #f1f5f9; }
+    .fg-code { font-family: 'JetBrains Mono', monospace; }
+    .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scroll-thin::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    .scroll-thin::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 3px; }
+    .scroll-thin::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+    [x-cloak] { display: none !important; }
+    .fg-zone {
+      position: absolute;
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .fg-zone.fg-over {
+      border-color: rgba(56, 189, 248, 0.9);
+      background: rgba(56, 189, 248, 0.1);
+    }
+    .fg-chip {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.15s ease;
+      min-height: 44px;
+    }
+    .fg-chip:active { cursor: grabbing; }
+    .fg-chip:hover { border-color: rgba(56, 189, 248, 0.5); }
+    .fg-field { min-height: 44px; }
+    input[type="color"] { min-height: 44px; min-width: 44px; padding: 2px; cursor: pointer; }
+    input[type="checkbox"] { min-width: 20px; min-height: 20px; }
+    select, input[type="text"], input[type="number"], input[type="password"] {
+      min-height: 44px;
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-sky-500 selection:text-white" x-data="framego()" x-init="init()" x-cloak>
+  
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 py-6 lg:py-8">
+
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5 mb-8 backdrop-blur-md">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-slate-950 font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-5zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-5z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            FrameGo <span class="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">Studio</span>
+          </h1>
+          <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+            <span class="flex h-2 w-2 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" :class="statusOk() ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2" :class="statusOk() ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+            </span>
+            <span x-text="statusCount() + ' active modules running'"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <a href="/kiosk" target="_blank" class="text-xs font-medium px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/80 text-slate-300 transition shadow-sm flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          Kiosk
+        </a>
+        <template x-if="dirty">
+          <span class="text-xs font-medium text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-full flex items-center gap-1.5 animate-pulse">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Unsaved changes
+          </span>
+        </template>
+        <button @click="reloadFromDisk()" class="text-xs font-medium px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/80 text-slate-300 transition shadow-sm">
+          Reload from disk
+        </button>
+        <button @click="save()" :disabled="saving || loading"
+          class="text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md disabled:opacity-50 flex items-center gap-2"
+          :class="dirty ? 'bg-sky-500 text-slate-950 hover:bg-sky-400 shadow-sky-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700/50'">
+          <svg x-show="saving" class="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-current" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <span x-text="saving ? 'Saving changes...' : 'Save configuration'"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Toast -->
+    <div x-show="toastMsg" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
+      class="fixed top-6 right-6 z-50 max-w-md text-sm px-4 py-3 rounded-xl shadow-2xl backdrop-blur-xl border flex items-center gap-3"
+      :class="toastType === 'error' ? 'bg-red-950/90 text-red-200 border-red-800/60 shadow-red-950/30' : 'bg-slate-900/90 text-emerald-200 border-emerald-500/30 shadow-emerald-950/30'">
+      <div class="w-2 h-2 rounded-full flex-shrink-0" :class="toastType === 'error' ? 'bg-red-400' : 'bg-emerald-400'"></div>
+      <span x-text="toastMsg" class="font-medium"></span>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid gap-8 lg:grid-cols-[1fr_400px] items-start">
+
+      <!-- Left: Zone Canvas -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between bg-slate-900/40 p-3.5 rounded-xl border border-slate-800/60 backdrop-blur-sm">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16"/></svg>
+            <h2 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Zone Layout Canvas</h2>
+          </div>
+          <span class="text-xs font-mono font-medium text-sky-400 bg-sky-950/50 px-2.5 py-1 rounded-md border border-sky-800/40" x-text="display.width + ' × ' + display.height + ' px'"></span>
+        </div>
+
+        <div class="relative w-full rounded-2xl border border-slate-800 bg-slate-900/30 shadow-2xl overflow-hidden backdrop-blur-md group"
+          :style="'aspect-ratio: ' + (display.width || 800) + ' / ' + (display.height || 480)">
+          
+          <div class="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none"></div>
+
+          <template x-for="z in zones" :key="z.id">
+            <div class="fg-zone transition-all duration-200" :class="[isBar(z.id) ? 'fg-bar' : 'fg-col', dragOverZone === z.id ? 'fg-over ring-2 ring-sky-400 bg-sky-500/10' : '']"
+              :style="posStyle(z)"
+              @dragover.prevent="dragOverZone = z.id"
+              @dragleave="if (dragOverZone === z.id) dragOverZone = null"
+              @drop="onDrop($event, z.id)">
+              <div class="text-[10px] font-mono tracking-wider uppercase text-slate-400 px-2 py-0.5 bg-slate-950/80 rounded border border-slate-800 mb-1 w-max" x-text="z.id"></div>
+              <template x-for="m in modulesInZone(z.id)" :key="m.name">
+                <div class="fg-chip shadow-md hover:border-sky-500/50" draggable="true"
+                  @dragstart="onDragStart($event, m.name)"
+                  @click="toggleEdit(m.name)">
+                  <span class="w-2 h-2 rounded-full shadow-sm flex-shrink-0" :class="m.visible ? 'bg-emerald-400 shadow-emerald-400/50' : 'bg-slate-600'"></span>
+                  <span x-text="m.name" class="text-xs font-medium text-slate-200 truncate"></span>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/20 px-4 py-3 rounded-xl border border-slate-800/40">
+          <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Drag module chips onto zones. Use arrows in module settings to reorder within a zone.</span>
+        </div>
+      </section>
+
+      <!-- Right: Settings Sidebar -->
+      <aside class="space-y-5">
+
+        <!-- Display Parameters -->
+        <div class="rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl backdrop-blur-xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/80">
+            <span class="font-semibold text-sm text-slate-200 flex items-center gap-2">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Display Parameters
+            </span>
+          </div>
+          <div class="p-5 grid grid-cols-3 gap-3.5 text-sm">
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Width</span>
+              <input type="number" x-model.number="display.width" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition"></label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Height</span>
+              <input type="number" x-model.number="display.height" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition"></label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">FPS</span>
+              <input type="number" x-model.number="display.fps" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition"></label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Margin</span>
+              <input type="number" x-model.number="display.margin" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition"></label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Gap</span>
+              <input type="number" x-model.number="display.gap" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition"></label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Background</span>
+              <input type="text" x-model="display.background" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition"></label>
+          </div>
+        </div>
+
+        <!-- Modules Registry -->
+        <div class="rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl backdrop-blur-xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/80">
+            <span class="font-semibold text-sm text-slate-200 flex items-center gap-2">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              Modules Registry
+            </span>
+            <div class="flex items-center gap-2">
+              <select x-model="newType" class="text-xs bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-300 outline-none focus:border-sky-500 transition min-h-[36px]">
+                <option value="" x-text="moduleTypes.length ? 'Select type...' : 'No types'"></option>
+                <template x-for="t in moduleTypes" :key="t">
+                  <option :value="t" x-text="t"></option>
+                </template>
+              </select>
+              <button @click="addModule()" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition shadow-sm min-h-[36px]">+</button>
+            </div>
+          </div>
+          <div class="p-4 space-y-3">
+            <template x-for="m in modules" :key="m.name">
+              <div class="border border-slate-800/80 rounded-xl bg-slate-950/60 overflow-hidden shadow-sm transition hover:border-slate-700">
+                <div class="flex items-center gap-2.5 px-3.5 py-3 bg-slate-900/40">
+                  <span class="text-sm font-bold text-slate-100" x-text="m.name"></span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-400 border border-slate-700/50" x-text="zoneLabel(m.zone)"></span>
+                  <div class="ml-auto flex items-center gap-1">
+                    <button @click="moveModule(m.name, -1)" class="w-6 h-6 rounded-md text-xs hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center">&#9650;</button>
+                    <button @click="moveModule(m.name, 1)" class="w-6 h-6 rounded-md text-xs hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center">&#9660;</button>
+                    <button @click="removeModule(m.name)" class="w-6 h-6 rounded-md text-xs hover:bg-red-950/60 hover:text-red-300 border border-slate-800 text-slate-500 transition flex items-center justify-center">&#10005;</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 px-3.5 py-2.5 text-xs text-slate-400 border-t border-slate-800/40 bg-slate-950/30">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" x-model="m.visible" @change="dirty = true" class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 focus:ring-offset-0 accent-sky-500">
+                    <span class="text-slate-300 font-medium">Visible</span>
+                  </label>
+                  <select x-model="m.zone" @change="dirty = true"
+                    class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 outline-none focus:border-sky-500 transition">
+                    <template x-for="z in zones" :key="z.id">
+                      <option :value="z.id" x-text="z.id"></option>
+                    </template>
+                  </select>
+                  <button @click="toggleEdit(m.name)" class="ml-auto text-sky-400 hover:text-sky-300 font-medium transition"
+                    x-text="expanded === m.name ? 'Hide options' : 'Configure'"></button>
+                </div>
+
+                <!-- Module Options Panel -->
+                <template x-if="expanded === m.name">
+                  <div class="p-3.5 bg-slate-950/90 border-t border-slate-800/60">
+                    <!-- Schema exists: form mode -->
+                    <template x-if="schemas[m.name]">
+                      <div>
+                        <div class="flex items-center gap-2 mb-3">
+                          <span class="text-[10px] font-mono text-slate-500 truncate" x-text="schemas[m.name].description"></span>
+                          <div class="ml-auto flex items-center bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+                            <button @click="optionsMode[m.name] = 'form'" class="px-2 py-1 text-[10px] font-medium transition"
+                              :class="optionsMode[m.name] === 'form' ? 'bg-sky-500/20 text-sky-400' : 'text-slate-500 hover:text-slate-300'">Form</button>
+                            <button @click="toggleOptionsMode(m.name)" class="px-2 py-1 text-[10px] font-medium transition"
+                              :class="optionsMode[m.name] === 'json' ? 'bg-sky-500/20 text-sky-400' : 'text-slate-500 hover:text-slate-300'">JSON</button>
+                          </div>
+                        </div>
+
+                        <!-- Form Mode -->
+                        <div x-show="optionsMode[m.name] === 'form'" class="space-y-3">
+                          <template x-for="f in schemas[m.name].fields" :key="f.key">
+                            <div class="fg-field">
+                              <label class="flex items-center gap-1.5 mb-1">
+                                <span class="text-[11px] font-medium text-slate-400" x-text="f.label"></span>
+                                <span x-show="f.required" class="text-red-400 text-[10px]">*</span>
+                                <span x-show="f.hint" class="text-[10px] text-slate-600" x-text="f.hint" :title="f.hint"></span>
+                              </label>
+
+                              <!-- Text / Password / File -->
+                              <template x-if="f.kind === 'text' || f.kind === 'password' || f.kind === 'file'">
+                                <input :type="f.kind === 'password' ? 'password' : 'text'"
+                                  :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                                  :placeholder="f.placeholder || f.default"
+                                  @input="setField(m, f.key, $event.target.value)"
+                                  class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                              </template>
+
+                              <!-- Number -->
+                              <template x-if="f.kind === 'number'">
+                                <input type="number"
+                                  :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                                  :min="f.min || undefined" :max="f.max || undefined"
+                                  @input="setFieldNum(m, f.key, $event.target.value)"
+                                  class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                              </template>
+
+                              <!-- Duration (stored as seconds) -->
+                              <template x-if="f.kind === 'duration'">
+                                <div class="flex items-center gap-2">
+                                  <input type="number"
+                                    :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                                    min="1"
+                                    @input="setFieldNum(m, f.key, $event.target.value)"
+                                    class="flex-1 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition">
+                                  <span class="text-[10px] text-slate-500">sec</span>
+                                </div>
+                              </template>
+
+                              <!-- Boolean -->
+                              <template x-if="f.kind === 'boolean'">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                  <input type="checkbox"
+                                    :checked="m.options[f.key] !== undefined ? m.options[f.key] : f.default === 'true'"
+                                    @change="setFieldBool(m, f.key, $event.target.checked)"
+                                    class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 focus:ring-offset-0 accent-sky-500">
+                                  <span class="text-xs text-slate-400" x-text="(m.options[f.key] !== undefined ? m.options[f.key] : f.default === 'true') ? 'On' : 'Off'"></span>
+                                </label>
+                              </template>
+
+                              <!-- Select -->
+                              <template x-if="f.kind === 'select'">
+                                <select :value="m.options[f.key] !== undefined ? m.options[f.key] : f.default"
+                                  @change="setField(m, f.key, $event.target.value)"
+                                  class="w-full bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none focus:border-sky-500 transition">
+                                  <template x-for="opt in f.options" :key="opt">
+                                    <option :value="opt" x-text="opt"></option>
+                                  </template>
+                                </select>
+                              </template>
+
+                              <!-- Color -->
+                              <template x-if="f.kind === 'color'">
+                                <div class="flex items-center gap-2">
+                                  <input type="color"
+                                    :value="m.options[f.key] || f.default"
+                                    @input="setField(m, f.key, $event.target.value)"
+                                    class="w-10 h-10 rounded-lg border border-slate-800 cursor-pointer bg-transparent">
+                                  <input type="text"
+                                    :value="m.options[f.key] || f.default"
+                                    @input="setField(m, f.key, $event.target.value)"
+                                    class="flex-1 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-sky-500 transition"
+                                    placeholder="#rrggbb">
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+
+                        <!-- JSON Mode -->
+                        <div x-show="optionsMode[m.name] === 'json'">
+                          <textarea x-model="m.optionsText" @input="optionsChanged(m)" rows="5" spellcheck="false"
+                            class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs fg-code text-slate-200 outline-none focus:border-sky-500 scroll-thin shadow-inner" placeholder="JSON options..."></textarea>
+                          <p x-show="m.optionsErr" class="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1" x-text="m.optionsErr"></p>
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- No schema: JSON only -->
+                    <template x-if="!schemas[m.name]">
+                      <div>
+                        <textarea x-model="m.optionsText" @input="optionsChanged(m)" rows="5" spellcheck="false"
+                          class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs fg-code text-slate-200 outline-none focus:border-sky-500 scroll-thin shadow-inner" placeholder="JSON options..."></textarea>
+                        <p x-show="m.optionsErr" class="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1" x-text="m.optionsErr"></p>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <p x-show="modules.length === 0" class="text-xs text-slate-500 py-4 text-center">No modules configured yet. Add one above.</p>
+          </div>
+        </div>
+
+        <!-- Admin Server Configuration -->
+        <div class="rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl backdrop-blur-xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-800/80 font-semibold text-sm text-slate-200 bg-slate-900/80 flex items-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+            Admin Server Configuration
+          </div>
+          <div class="p-5 grid grid-cols-2 gap-4 text-sm">
+            <label class="flex items-center gap-2.5 col-span-2 cursor-pointer">
+              <input type="checkbox" x-model="admin.enabled" @change="dirty = true" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 focus:ring-offset-0 accent-sky-500">
+              <span class="text-slate-300 font-medium text-xs">Enable remote management server (restart required for bind updates)</span>
+            </label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Bind Address</span>
+              <input type="text" x-model="admin.bind" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 outline-none transition"></label>
+            <label class="block"><span class="text-[11px] font-medium text-slate-400">Access Token (Blank = Public)</span>
+              <input type="password" x-model="admin.token" @change="dirty = true"
+                class="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono focus:border-sky-500 outline-none transition"></label>
+          </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl backdrop-blur-xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/80">
+            <span class="font-semibold text-sm text-slate-200 flex items-center gap-2">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              Live Frame Preview
+            </span>
+            <button @click="refreshPreview()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition shadow-sm font-medium">Refresh</button>
+          </div>
+          <div class="p-4">
+            <div class="relative rounded-xl overflow-hidden border border-slate-800/80 bg-slate-950 flex items-center justify-center min-h-[160px] shadow-inner">
+              <img :src="previewSrc()" @error="previewError = true" @load="previewError = false"
+                class="w-full h-auto object-contain" alt="Current Display Frame">
+              <div x-show="previewError" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 text-slate-400 gap-2 p-4 text-center">
+                <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                <span class="text-xs font-medium text-slate-400">Preview Stream Offline</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module Status -->
+        <div class="rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-xl backdrop-blur-xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-800/80 font-semibold text-sm text-slate-200 bg-slate-900/80 flex items-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Telemetry & Module Status
+          </div>
+          <div class="p-4 space-y-2">
+            <template x-for="s in status" :key="s.name">
+              <div class="flex items-center gap-3 text-xs px-3 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800/60">
+                <span class="w-2.5 h-2.5 rounded-full shadow-sm"
+                  :class="s.state === 'active' ? 'bg-emerald-400 shadow-emerald-400/50' : s.state === 'faulted' ? 'bg-red-500 shadow-red-500/50' : s.state === 'suspended' ? 'bg-slate-500' : 'bg-slate-700'"></span>
+                <span class="text-slate-200 font-semibold" x-text="s.name"></span>
+                <span class="text-slate-400 font-mono text-[11px] px-2 py-0.5 bg-slate-900 rounded border border-slate-800" x-text="s.state"></span>
+                <span class="ml-auto text-red-400 font-mono font-medium" x-text="s.error ? 'err' : ''"></span>
+              </div>
+            </template>
+            <p x-show="status.length === 0" class="text-xs text-slate-500 py-3 text-center">No active telemetry reported.</p>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

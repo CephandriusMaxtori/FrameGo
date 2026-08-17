@@ -1,0 +1,53 @@
+/* FrameGo admin UI */
+[x-cloak] { display: none !important; }
+
+.fg-zone {
+  position: absolute;
+  border-radius: 0.375rem;
+  padding: 0.2rem;
+  overflow: hidden;
+  transition: background 120ms, box-shadow 120ms;
+}
+.fg-zone.fg-bar {
+  background: rgba(51, 65, 85, 0.35);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+}
+.fg-zone.fg-col {
+  background: rgba(51, 65, 85, 0.16);
+  border: 1px solid rgba(71, 85, 105, 0.28);
+}
+.fg-zone.fg-over {
+  box-shadow: 0 0 0 2px #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+}
+.fg-zone-label {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.7);
+  pointer-events: none;
+}
+
+.fg-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.375rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  font-size: 11px;
+  color: #e2e8f0;
+  cursor: grab;
+  user-select: none;
+}
+.fg-chip:hover { border-color: #38bdf8; }
+.fg-chip:active { cursor: grabbing; }
+
+.fg-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }

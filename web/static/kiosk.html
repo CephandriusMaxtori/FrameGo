@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FrameGo</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    body { display: flex; align-items: center; justify-content: center; }
+    #frame { max-width: 100vw; max-height: 100vh; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <img id="frame" alt="">
+  <script>
+    const token = new URLSearchParams(location.search).get("token") || "";
+    const frame = document.getElementById("frame");
+    const pending = new Image();
+
+    pending.onload = () => { frame.src = pending.src; };
+    pending.onerror = () => setTimeout(refresh, 2000);
+
+    function snapshot() {
+      pending.src = "/api/snapshot?t=" + Date.now() + (token ? "&token=" + encodeURIComponent(token) : "");
+    }
+
+    async function init() {
+      const headers = {};
+      if (token) headers["X-FrameGo-Token"] = token;
+      let interval = 1000;
+      try {
+        const res = await fetch("/api/config", { headers });
+        const cfg = await res.json();
+        if (cfg && cfg.display && cfg.display.fps > 0) interval = Math.max(250, 1000 / cfg.display.fps);
+      } catch (_) {}
+      snapshot();
+      setInterval(snapshot, interval);
+    }
+
+    function refresh() { snapshot(); }
+    init();
+  </script>
+</body>
+</html>
