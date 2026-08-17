@@ -1,4 +1,5 @@
 # FrameGo
+[![Release](https://github.com/CephandriusMaxtori/FrameGo/actions/workflows/release.yml/badge.svg)](https://github.com/CephandriusMaxtori/FrameGo/actions/workflows/release.yml)
 
 A dependency-light smart mirror / kiosk engine written in Go. FrameGo renders a
 grid of widget **modules** onto a display (PNG, Linux framebuffer) using a
