@@ -68,7 +68,7 @@ func (m *Moon) Stop() error { return nil }
 func (m *Moon) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time) error {
 	f, name := phaseOf(now.In(m.tz))
 
-	lf := fonts.Face(16, fonts.Regular)
+	lf := fonts.Scaled(bounds, 16, fonts.Regular)
 	label := name
 	if m.showPercent {
 		label = fmt.Sprintf("%s  %d%%", name, int(math.Round(f*100)))

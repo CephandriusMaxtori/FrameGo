@@ -80,7 +80,7 @@ func (q *Quote) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time) e
 		text = q.prefix + " " + text
 	}
 
-	f := fonts.Face(20, fonts.Regular)
+	f := fonts.Scaled(bounds, 20, fonts.Regular)
 	lines := render.WrapText(f, text, bounds.Dx())
 	_, _, lineHeight := cv.FaceMetrics(f)
 	blockH := len(lines) * lineHeight

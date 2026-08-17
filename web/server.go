@@ -78,6 +78,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/status", s.handleStatus)
 	mux.HandleFunc("GET /api/schemas", s.handleSchemas)
 	mux.HandleFunc("GET /api/snapshot", s.handleSnapshot)
+	mux.HandleFunc("GET /api/presets", s.handlePresets)
+	mux.HandleFunc("POST /api/presets/apply", s.handleApplyPreset)
 	mux.HandleFunc("POST /api/reload", s.handleReload)
 	return s.auth(mux)
 }

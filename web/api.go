@@ -10,6 +10,7 @@ import (
 	"framego/engine"
 	"framego/layout"
 	"framego/modules"
+	"framego/presets"
 )
 
 // auth gates requests with the configured admin token. When no token is set,
@@ -133,4 +134,43 @@ func (s *Server) handleSchemas(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	writeJSON(w, http.StatusOK, schemas)
+}
+
+func (s *Server) handlePresets(w http.ResponseWriter, r *http.Request) {
+	type presetSummary struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	all := presets.All()
+	summaries := make([]presetSummary, len(all))
+	for i, p := range all {
+		summaries[i] = presetSummary{Name: p.Name, Description: p.Description}
+	}
+	writeJSON(w, http.StatusOK, summaries)
+}
+
+func (s *Server) handleApplyPreset(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&req); err != nil {
+		writeErr(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	for _, p := range presets.All() {
+		if p.Name == req.Name {
+			cfg := p.Config
+			if err := cfg.Save(s.configPath); err != nil {
+				writeErr(w, http.StatusInternalServerError, "save config: "+err.Error())
+				return
+			}
+			if err := s.engine.Reload(&cfg); err != nil {
+				writeErr(w, http.StatusInternalServerError, "reload: "+err.Error())
+				return
+			}
+			writeJSON(w, http.StatusOK, map[string]any{"ok": true, "config": &cfg})
+			return
+		}
+	}
+	writeErr(w, http.StatusNotFound, "preset not found")
 }

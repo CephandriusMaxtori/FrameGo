@@ -65,8 +65,8 @@ func (c *Clock) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time) e
 	timeStr := t.Format(c.format)
 	dateStr := t.Format(c.dateFormat)
 
-	tf := fonts.Face(72, fonts.Medium)
-	df := fonts.Face(26, fonts.Regular)
+	tf := fonts.Scaled(bounds, 72, fonts.Medium)
+	df := fonts.Scaled(bounds, 26, fonts.Regular)
 	tw, th := cv.TextSize(tf, timeStr)
 	dw, dh := cv.TextSize(df, dateStr)
 	spacing := 10

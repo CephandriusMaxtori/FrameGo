@@ -11,6 +11,7 @@ const (
 	TopicPowerDim    = "system:power:dim"
 	TopicNetwork     = "system:network:status"
 	TopicModuleState = "module:state:change"
+	TopicTouch       = "input:touch"
 )
 
 // Event is a single message broadcast on the bus.

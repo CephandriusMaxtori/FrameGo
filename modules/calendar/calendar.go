@@ -250,8 +250,8 @@ func (c *Calendar) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time
 		return drawCenter(cv, bounds, "no upcoming events", c.dateColor)
 	}
 
-	tf := fonts.Face(15, fonts.Medium)
-	ef := fonts.Face(15, fonts.Regular)
+	tf := fonts.Scaled(bounds, 15, fonts.Medium)
+	ef := fonts.Scaled(bounds, 15, fonts.Regular)
 	rowH := 24
 	dateCol := 112
 	summaryW := bounds.Dx() - dateCol
@@ -329,7 +329,7 @@ func truncateToFit(cv *render.Canvas, f font.Face, s string, maxW int) string {
 
 // drawCenter renders a single centered status line.
 func drawCenter(cv *render.Canvas, bounds image.Rectangle, msg string, col color.RGBA) error {
-	f := fonts.Face(16, fonts.Regular)
+	f := fonts.Scaled(bounds, 16, fonts.Regular)
 	lines := render.WrapText(f, msg, bounds.Dx())
 	_, _, lh := cv.FaceMetrics(f)
 	ascent := cv.Ascent(f)

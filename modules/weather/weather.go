@@ -321,21 +321,21 @@ func (w *Weather) Draw(cv *render.Canvas, bounds image.Rectangle, _ time.Time) e
 		return drawCenter(cv, bounds, msg, w.condColor)
 	}
 
-	locF := fonts.Face(15, fonts.Regular)
+	locF := fonts.Scaled(bounds, 15, fonts.Regular)
 	locW, _ := cv.TextSize(locF, loc)
 	ascentLoc := cv.Ascent(locF)
 
-	tempF := fonts.Face(56, fonts.Medium)
+	tempF := fonts.Scaled(bounds, 56, fonts.Medium)
 	tempStr := fmt.Sprintf("%s°", w.formatTemp(snap.temp))
 	tempW, tempH := cv.TextSize(tempF, tempStr)
 	ascentTemp := cv.Ascent(tempF)
 
-	condF := fonts.Face(18, fonts.Regular)
+	condF := fonts.Scaled(bounds, 18, fonts.Regular)
 	feelsStr := fmt.Sprintf("%s · %s · %d%% · %s", snap.cond, w.formatTemp(snap.feels), snap.humidity, w.formatWind(snap.wind))
 	feelsW, _ := cv.TextSize(condF, feelsStr)
 	ascentFeels := cv.Ascent(condF)
 
-	hiLoF := fonts.Face(16, fonts.Regular)
+	hiLoF := fonts.Scaled(bounds, 16, fonts.Regular)
 	hiLoStr := fmt.Sprintf("H %s   L %s", w.formatTemp(snap.hi), w.formatTemp(snap.lo))
 	hiLoW, _ := cv.TextSize(hiLoF, hiLoStr)
 
@@ -366,7 +366,7 @@ func (w *Weather) Draw(cv *render.Canvas, bounds image.Rectangle, _ time.Time) e
 
 // drawDays renders per-day forecast columns across the bottom of bounds.
 func (w *Weather) drawDays(cv *render.Canvas, bounds image.Rectangle, y int, days []dayInfo) {
-	f := fonts.Face(13, fonts.Regular)
+	f := fonts.Scaled(bounds, 13, fonts.Regular)
 	colW := bounds.Dx() / len(days)
 	ascent := cv.Ascent(f)
 	for i, d := range days {
@@ -411,7 +411,7 @@ func (w *Weather) snapshotErr() string {
 
 // drawCenter renders a single centered status line.
 func drawCenter(cv *render.Canvas, bounds image.Rectangle, msg string, col color.RGBA) error {
-	f := fonts.Face(16, fonts.Regular)
+	f := fonts.Scaled(bounds, 16, fonts.Regular)
 	lines := render.WrapText(f, msg, bounds.Dx())
 	_, _, lh := cv.FaceMetrics(f)
 	ascent := cv.Ascent(f)

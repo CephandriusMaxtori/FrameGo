@@ -5,6 +5,7 @@ package fonts
 
 import (
 	"fmt"
+	"image"
 	"os"
 	"sync"
 
@@ -99,4 +100,25 @@ func newFace(key string, data []byte, size float64) (font.Face, error) {
 	}
 	cache[key] = face
 	return face, nil
+}
+
+// refHeight is the canvas height (in pixels) at which the hardcoded font
+// sizes in each module look correct. Scaling is relative to this baseline.
+const refHeight = 480.0
+
+// Scaled returns a cached face whose point size is proportional to the zone
+// height relative to refHeight. A zone of 480px tall uses the base size
+// unchanged; taller zones get larger text, smaller zones get smaller text.
+// The minimum returned size is 8pt to stay legible.
+func Scaled(bounds image.Rectangle, base float64, weight Weight) font.Face {
+	h := float64(bounds.Dy())
+	if h <= 0 {
+		h = refHeight
+	}
+	scale := h / refHeight
+	size := base * scale
+	if size < 8 {
+		size = 8
+	}
+	return Face(size, weight)
 }

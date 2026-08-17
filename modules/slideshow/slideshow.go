@@ -168,7 +168,7 @@ func decodeFile(path string) (image.Image, error) {
 }
 
 func drawEmpty(cv *render.Canvas, bounds image.Rectangle) error {
-	f := fonts.Face(18, fonts.Regular)
+	f := fonts.Scaled(bounds, 18, fonts.Regular)
 	msg := "no images"
 	w, _ := cv.TextSize(f, msg)
 	ascent := cv.Ascent(f)

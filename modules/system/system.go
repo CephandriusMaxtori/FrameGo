@@ -181,8 +181,8 @@ func (s *System) Draw(cv *render.Canvas, bounds image.Rectangle, _ time.Time) er
 		return drawCollecting(cv, bounds, lastErr)
 	}
 
-	lf := fonts.Face(15, fonts.Medium)
-	df := fonts.Face(13, fonts.Regular)
+	lf := fonts.Scaled(bounds, 15, fonts.Medium)
+	df := fonts.Scaled(bounds, 13, fonts.Regular)
 	rowH := 30
 	labelW := 52
 	barH := 8
@@ -240,7 +240,7 @@ func bytesFmt(b uint64) string {
 
 // drawCollecting paints a placeholder before the first sample arrives.
 func drawCollecting(cv *render.Canvas, bounds image.Rectangle, err error) error {
-	f := fonts.Face(16, fonts.Regular)
+	f := fonts.Scaled(bounds, 16, fonts.Regular)
 	msg := "system: collecting…"
 	if err != nil {
 		msg = "system: unavailable"

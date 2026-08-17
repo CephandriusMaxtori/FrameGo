@@ -61,8 +61,8 @@ func (d *Date) Stop() error { return nil }
 func (d *Date) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time) error {
 	t := now.In(d.tz)
 
-	df := fonts.Face(34, fonts.Medium)
-	wf := fonts.Face(20, fonts.Regular)
+	df := fonts.Scaled(bounds, 34, fonts.Medium)
+	wf := fonts.Scaled(bounds, 20, fonts.Regular)
 	ds := t.Format(d.format)
 	ws := t.Format(d.weekday)
 

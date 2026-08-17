@@ -254,9 +254,9 @@ func (n *NFL) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time) err
 		return drawCenter(cv, bounds, "no games scheduled", n.timeColor)
 	}
 
-	tf := fonts.Face(15, fonts.Medium)
-	sf := fonts.Face(15, fonts.Bold)
-	df := fonts.Face(13, fonts.Regular)
+	tf := fonts.Scaled(bounds, 15, fonts.Medium)
+	sf := fonts.Scaled(bounds, 15, fonts.Bold)
+	df := fonts.Scaled(bounds, 13, fonts.Regular)
 	rowH := 36
 	ascentT := cv.Ascent(tf)
 	ascentS := cv.Ascent(sf)
@@ -281,7 +281,7 @@ func (n *NFL) Draw(cv *render.Canvas, bounds image.Rectangle, now time.Time) err
 
 // drawCenter renders a single centered status line.
 func drawCenter(cv *render.Canvas, bounds image.Rectangle, msg string, col color.RGBA) error {
-	f := fonts.Face(16, fonts.Regular)
+	f := fonts.Scaled(bounds, 16, fonts.Regular)
 	lines := render.WrapText(f, msg, bounds.Dx())
 	_, _, lh := cv.FaceMetrics(f)
 	ascent := cv.Ascent(f)
