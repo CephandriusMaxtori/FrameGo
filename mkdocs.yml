@@ -61,6 +61,7 @@ nav:
       - Moon: modules/moon.md
       - Quote: modules/quote.md
       - Slideshow: modules/slideshow.md
+      - Smart Home: modules/smarthome.md
   - Kiosk Mode: kiosk.md
   - Admin UI: admin-ui.md
   - REST API: api.md
