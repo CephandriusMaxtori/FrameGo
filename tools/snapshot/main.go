@@ -17,6 +17,7 @@ import (
 	_ "framego/modules/nfl"
 	_ "framego/modules/quote"
 	_ "framego/modules/slideshow"
+	_ "framego/modules/smarthome"
 	_ "framego/modules/system"
 	_ "framego/modules/weather"
 	"framego/render"
