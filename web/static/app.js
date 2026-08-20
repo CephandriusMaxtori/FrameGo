@@ -37,7 +37,12 @@ window.framego = function () {
         this.zones = zones.zones || [];
         this.moduleTypes = zones.moduleTypes || [];
       }
-      if (schemas) this.schemas = schemas;
+      if (schemas) {
+        this.schemas = schemas;
+        for (const [name, s] of Object.entries(schemas)) {
+          this.moduleDescriptions[name] = s.description || "";
+        }
+      }
       this.newType = this.moduleTypes.find((t) => !this.modules.some((m) => m.name === t)) || "";
       this.loading = false;
       this.refreshStatus();
@@ -131,14 +136,30 @@ window.framego = function () {
       this.dirty = true;
     },
 
-    addModule() {
+    defaultZones: {
+      clock: "middle-center",
+      date: "middle-center",
+      weather: "upper-right",
+      calendar: "upper-left",
+      system: "lower-left",
+      moon: "top-right",
+      quote: "lower-center",
+      nfl: "middle-right",
+      smarthome: "lower-right",
+      slideshow: "middle-center",
+    },
+
+    moduleDescriptions: {},
+
+    addModule(zone) {
       const type = this.newType;
       if (!type) return;
       if (this.modules.some((m) => m.name === type)) {
         this.toast('Module "' + type + '" is already added', "error");
         return;
       }
-      const m = this.decorate({ name: type, zone: "top-left", visible: true });
+      const defaultZone = zone || this.defaultZones[type] || "top-left";
+      const m = this.decorate({ name: type, zone: defaultZone, visible: true });
       const schema = this.schemas[type];
       if (schema) {
         for (const f of schema.fields) {
@@ -146,8 +167,20 @@ window.framego = function () {
         }
       }
       this.modules.push(m);
+      this.expanded = type;
       this.newType = this.moduleTypes.find((t) => !this.modules.some((m) => m.name === t)) || "";
       this.dirty = true;
+      this.toast("Added " + type + " to " + defaultZone, "ok");
+    },
+
+    addModuleToZone(zoneId) {
+      const available = this.moduleTypes.filter((t) => !this.modules.some((m) => m.name === t));
+      if (available.length === 0) {
+        this.toast("All modules already added", "error");
+        return;
+      }
+      this.newType = available[0];
+      this.addModule(zoneId);
     },
 
     parseDefault(f) {
