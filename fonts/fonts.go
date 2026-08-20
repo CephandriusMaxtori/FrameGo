@@ -106,16 +106,22 @@ func newFace(key string, data []byte, size float64) (font.Face, error) {
 // sizes in each module look correct. Scaling is relative to this baseline.
 const refHeight = 480.0
 
-// Scaled returns a cached face whose point size is proportional to the zone
-// height relative to refHeight. A zone of 480px tall uses the base size
-// unchanged; taller zones get larger text, smaller zones get smaller text.
-// The minimum returned size is 8pt to stay legible.
-func Scaled(bounds image.Rectangle, base float64, weight Weight) font.Face {
-	h := float64(bounds.Dy())
-	if h <= 0 {
-		h = refHeight
+var dispHeight float64 = refHeight
+
+// SetDisplayHeight sets the display height used by Scaled for proportional
+// font sizing. Call once at startup after loading the display config.
+func SetDisplayHeight(h int) {
+	if h > 0 {
+		dispHeight = float64(h)
 	}
-	scale := h / refHeight
+}
+
+// Scaled returns a cached face whose point size is proportional to the
+// display height relative to refHeight. A 480px display uses the base size
+// unchanged; taller displays get larger text, shorter displays get smaller
+// text. The minimum returned size is 8pt to stay legible.
+func Scaled(bounds image.Rectangle, base float64, weight Weight) font.Face {
+	scale := dispHeight / refHeight
 	size := base * scale
 	if size < 8 {
 		size = 8

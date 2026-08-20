@@ -13,6 +13,7 @@ import (
 
 	"framego/config"
 	"framego/engine"
+	"framego/fonts"
 	"framego/input"
 	"framego/modules"
 	_ "framego/modules/calendar"
@@ -61,6 +62,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("config: %v", err)
 	}
+
+	fonts.SetDisplayHeight(cfg.Display.Height)
 
 	logr := engine.NewLogger(os.Stdout)
 
