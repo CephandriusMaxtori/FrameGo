@@ -13,6 +13,7 @@ import (
 
 	"framego/config"
 	"framego/engine"
+	"framego/input"
 	"framego/modules"
 	_ "framego/modules/calendar"
 	_ "framego/modules/clock"
@@ -29,12 +30,13 @@ import (
 )
 
 func main() {
-	var configPath, out, fbPath, backendKind string
+	var configPath, out, fbPath, backendKind, touchPath string
 	var snapshot bool
 	flag.StringVar(&configPath, "config", "", "path to config.json or config.yaml (auto-detected if empty)")
 	flag.StringVar(&backendKind, "backend", "auto", "display backend: auto|png|fb")
 	flag.StringVar(&out, "out", "frame.png", "output path for the png backend / snapshot")
 	flag.StringVar(&fbPath, "fb", "/dev/fb0", "linux framebuffer device")
+	flag.StringVar(&touchPath, "touch", "", "touch input device path (empty=auto-detect, \"none\"=disabled)")
 	flag.BoolVar(&snapshot, "snapshot", false, "render a single frame to -out and exit")
 	flag.Parse()
 
@@ -79,6 +81,32 @@ func main() {
 		log.Fatalf("engine: %v", err)
 	}
 
+	var touchDev *input.Evdev
+	if touchPath != "none" && !snapshot {
+		if touchPath == "" {
+			detected, err := input.AutoTouchDevice(logr)
+			if err != nil {
+				logr.Printf("touch: %v", err)
+			} else {
+				touchPath = detected
+				if name := input.DeviceName(detected); name != "" {
+					logr.Printf("touch: using %s (%s)", detected, name)
+				} else {
+					logr.Printf("touch: using %s", detected)
+				}
+			}
+		}
+		if touchPath != "" && touchPath != "none" {
+			dev, err := input.NewEvdev(touchPath, eng.Bus(), logr, cfg.Display.Width, cfg.Display.Height)
+			if err != nil {
+				logr.Printf("touch: %v", err)
+			} else {
+				touchDev = dev
+				touchDev.Start()
+			}
+		}
+	}
+
 	if snapshot {
 		eng.Start()
 		img := eng.RenderFrame()
@@ -91,7 +119,12 @@ func main() {
 	}
 
 	eng.Start()
-	defer eng.Stop()
+	defer func() {
+		if touchDev != nil {
+			touchDev.Stop()
+		}
+		eng.Stop()
+	}()
 
 	if cfg.Admin.Enabled {
 		srv := web.New(eng, configPath, logr)

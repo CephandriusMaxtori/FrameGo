@@ -34,5 +34,23 @@ type errNotSupported struct{}
 
 func (errNotSupported) Error() string { return "evdev input is only supported on Linux (amd64/arm64)" }
 
+// ErrNoTouchDevice is returned when no touch-capable device is found.
+var ErrNoTouchDevice = errNoTouchDevice{}
+
+type errNoTouchDevice struct{}
+
+func (errNoTouchDevice) Error() string { return "no touch-capable input device found" }
+
 func (e *Evdev) Start() {}
 func (e *Evdev) Stop()  {}
+
+// AutoTouchDevice always returns ErrNotSupported on non-Linux platforms.
+func AutoTouchDevice(_ *engine.Logger) (string, error) {
+	return "", ErrNotSupported
+}
+
+// ListTouchDevices always returns nil on non-Linux platforms.
+func ListTouchDevices() []string { return nil }
+
+// DeviceName always returns empty string on non-Linux platforms.
+func DeviceName(_ string) string { return "" }

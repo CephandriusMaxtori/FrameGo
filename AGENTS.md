@@ -120,3 +120,9 @@ solver and canvas size. `Module` has `name`, `zone` (see `layout/zones.go`),
 `visible`, and free-form `options`. `Validate()` rejects empty display
 dimensions and duplicate/nameless/zoneless modules. Keep example configs valid
 so `-snapshot` and the admin UI keep working.
+
+## Task Tracking
+
+Maintain a `Todo.md` file at the repository root to track outstanding tasks,
+features, bugs, and improvements. When work is identified during development,
+add it to `Todo.md` with a brief description and status.
